@@ -1,0 +1,60 @@
+---
+layout: layouts/base.njk
+permalink: /
+---
+<section class="hero">
+  <h1 class="hero-line">{% for line in site.heroLine.split("\n") %}<span>{{ line }}</span>{% endfor %}</h1>
+  <p class="hero-intro">{{ site.heroIntro }}</p>
+</section>
+
+{%- set g = collections.posts | garden(collections.tagList) %}
+<section class="garden" aria-labelledby="garden-title">
+  <div class="garden-head">
+    <h2 id="garden-title">菜園</h2>
+    <p class="garden-range">
+      <span class="range-wide">{{ g.cols[0].y }} 年 {{ g.cols[0].m }} 月到 {{ g.cols[11].y }} 年 {{ g.cols[11].m }} 月</span>
+      <span class="range-narrow">{{ g.cols[6].y }} 年 {{ g.cols[6].m }} 月到 {{ g.cols[11].y }} 年 {{ g.cols[11].m }} 月</span>
+    </p>
+  </div>
+  <p class="garden-note">一列是一個主題，一格是一個月。那個月寫了幾篇，那格的菜就長多大。</p>
+
+  {%- if g.rows.length %}
+  <div class="garden-grid">
+    {%- for row in g.rows %}
+    <a class="garden-label" href="{{ row.name | tagUrl }}">{{ row.name }}</a>
+    {%- for cell in row.cells %}
+    {%- if cell.stage %}
+    <a class="plot" data-col="{{ loop.index0 }}" style="--i:{{ loop.index0 }}" href="{{ row.name | tagUrl }}"
+       title="{{ cell.y }} 年 {{ cell.m }} 月：{{ cell.posts | join('、') }}"
+       aria-label="{{ row.name }}，{{ cell.y }} 年 {{ cell.m }} 月，{{ cell.posts.length }} 篇">
+      <svg class="sprout" viewBox="0 0 32 32" aria-hidden="true"><use href="#sprout-{{ cell.stage }}"/></svg>
+    </a>
+    {%- else %}
+    <span class="plot is-empty" data-col="{{ loop.index0 }}" aria-hidden="true"></span>
+    {%- endif %}
+    {%- endfor %}
+    {%- endfor %}
+    <span class="garden-axis" aria-hidden="true"></span>
+    {%- for c in g.cols %}
+    <span class="garden-month" data-col="{{ loop.index0 }}" aria-hidden="true">{{ c.m }}月</span>
+    {%- endfor %}
+  </div>
+  <ul class="garden-legend" aria-label="圖例">
+    <li><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#sprout-1"/></svg>1 篇</li>
+    <li><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#sprout-2"/></svg>2–3 篇</li>
+    <li><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#sprout-3"/></svg>4 篇以上</li>
+  </ul>
+  {%- else %}
+  <p class="empty-note">菜園還是空的。替文章加上標籤，這裡就會長出第一株菜。</p>
+  {%- endif %}
+</section>
+
+<section class="posts" aria-labelledby="posts-title">
+  <h2 id="posts-title">所有筆記</h2>
+  {%- set listPosts = collections.posts | reverse %}
+  {%- if listPosts.length %}
+  {% include "post-list.njk" %}
+  {%- else %}
+  <p class="empty-note">還沒有文章。到 GitHub 的 posts 資料夾新增一個 .md 檔，就會出現在這裡。</p>
+  {%- endif %}
+</section>
